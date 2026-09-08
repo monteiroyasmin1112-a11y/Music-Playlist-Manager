@@ -1,7 +1,17 @@
 # Music Playlist Manager Project
 # begginning of the project
+import json
 import time
+
 playlists = {}
+try:
+    with open('playlists.json', 'r') as file:
+        playlists = json.load(file)
+except FileNotFoundError:
+    playlists = {}
+def save_playlists():
+    with open('playlists.json', 'w') as file:
+        json.dump(playlists, file, indent=4)
 while True:
     print('Welcome to the Playlist Manager!')
     print()
@@ -29,12 +39,25 @@ while True:
         playlist_name = (input('Please enter the name of your playlist: '))
         music_list = []
         print()
+        if playlist_name.strip() == '':
+                print('Playlist name cannot be empty!')
+                continue
+        elif playlist_name in playlists:
+                print('Playlist already exists!')
+                continue
         playlists[playlist_name] = music_list
         print(f'Playlist {playlist_name} created!')
         print()
         
         musics = (input('Please enter the name of the music you want to add to your playlist: '))
+        if musics.strip() == '':
+            print('Song name cannot be empty!')
+            continue
+        elif musics.lower() in [music.lower() for music in music_list]:
+            print('The song is already in the playlist!')
+            continue
         music_list.append(musics)
+        save_playlists()
         time.sleep(1)
         print()
         print('Music added to your playlist!') 
@@ -56,7 +79,14 @@ while True:
             elif user2 == 'YES':
                 new_music = (input('Please enter the name of the new music: '))
                 print()
+                if new_music.strip() == '':
+                        print('Song name cannot be empty!')
+                        continue
+                elif new_music.lower() in [music.lower() for music in music_list]:
+                        print('The song is already in the playlist!')
+                        continue
                 music_list.append(new_music)
+                save_playlists()
                 print()
                 for number, music in enumerate(music_list, start=1):
                     print(f'{number} - {music}')
@@ -70,6 +100,10 @@ while True:
                 print()
                 break
     elif user == '2':
+        if not playlists:
+            print('There are no playlists yet.')
+            print()
+            continue
         print('Going to a playlist already created...')
         print()
         time.sleep(1)
@@ -86,8 +120,7 @@ while True:
             print('Playlist not found!')
             print()
             time.sleep(1)
-            continue
-
+            continue   
 
         music_list = playlists[playlist_name]
 
@@ -105,7 +138,14 @@ while True:
         elif edit_option == '1':
             new_music = input('Enter the name of the music you want to add: ')
             print()
+            if new_music.strip() == '':
+                    print('Song name cannot be empty!')
+                    continue
+            elif new_music.lower() in [music.lower() for music in music_list]:
+                    print('The song is already in the playlist!')
+                    continue
             music_list.append(new_music)
+            save_playlists()
             print(f'Music {new_music} added to your playlist!')
             print()
             print(f'Playlist: {playlist_name}')
@@ -130,13 +170,32 @@ while True:
                     print()
                 else:
                     remove = music_list.pop(remove_music - 1)
+                    save_playlists()
                     print(f'"{remove}" removed successfully!')
                     print()
+                    time.sleep(1)
+                    print('Playlist updated!')
+                    print()
+                    print(f'Playlist: {playlist_name}')
+
+                    for number, music in enumerate(music_list,start=1):
+                        print(f'{number} - {music}')
+                print()
         elif edit_option == '3':
 
             new_name = input('Enter the new playlist name: ')
             print()
+
+            if new_name.strip() == '':
+                 print('Playlist name cannot be empty!')
+                 print()
+                 continue
+            elif new_name in playlists:
+                 print('Playlist already exists!')
+                 print()
+                 continue
             playlists[new_name] = playlists.pop(playlist_name)
+            save_playlists()
             playlist_name = new_name
             print(f'Playlist renamed to {new_name}!')
             print()
@@ -155,11 +214,21 @@ while True:
             print()
         
     elif user == '3':
+        if not playlists:
+            print('There are no playlists yet.')
+            print()
+            continue
         print('Here are your playlists:')
         print()
         time.sleep(1)
-        for playlist in playlists:
-            print(f'- {playlist}')
+        for playlist, music_list in playlists.items():
+            print(f'Playlist: {playlist}')
+            if not music_list:
+                 print('No songs in this playlist.')
+            else:
+                 for number, music in enumerate(music_list, start=1):
+                    print(f'{number} - {music}')
+                    print()
         show_playlist = input('\nPress Enter to return to the main menu...')
     elif user == '4':
         time.sleep(1)
